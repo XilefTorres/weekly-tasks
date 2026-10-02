@@ -14,6 +14,8 @@ export default function App() {
     addCheck,
     removeCheck,
     resetWeek,
+    syncStatus,
+    syncError,
   } = useChores();
 
   return (
@@ -22,6 +24,18 @@ export default function App() {
         <h1 className="mr-auto text-xl font-semibold tracking-tight md:text-3xl">
           Tareas de la semana
         </h1>
+
+        {/* Indicador de sincronización */}
+        <span className="text-xs text-stone-400">
+          {syncStatus === "loading" && "⏳ Cargando…"}
+          {syncStatus === "saving" && "☁️ Guardando…"}
+          {syncStatus === "error" && (
+            <span className="text-red-400" title={syncError ?? ""}>
+              ⚠️ Error al sincronizar
+            </span>
+          )}
+        </span>
+
         {/* Teléfono: el formulario baja a su propia fila; pantalla grande: queda en línea */}
         <div className="order-last w-full md:order-none md:w-auto">
           <AddChoreForm onAdd={addChore} />

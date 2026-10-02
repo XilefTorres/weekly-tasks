@@ -1,40 +1,47 @@
-import { useLocalStorage } from "./useLocalStorage";
-import { MEMBERS, type Chore, type Done, type Member } from "../types";
+import { useGitHubStorage } from "./useGitHubStorage";
+import { MEMBERS, type Member } from "../types";
 
 const newId = () =>
   Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
 
 export function useChores() {
-  const [chores, setChores] = useLocalStorage<Chore[]>("hogar:tareas", []);
-  const [done, setDone] = useLocalStorage<Done>("hogar:conteos", {});
+  const { state, updateState, status, error } = useGitHubStorage();
+  const { chores, done } = state;
 
   const addChore = (name: string) => {
     const clean = name.trim();
     if (!clean) return;
-    setChores((prev) => [...prev, { id: newId(), name: clean }]);
+    updateState((prev) => ({
+      ...prev,
+      chores: [...prev.chores, { id: newId(), name: clean }],
+    }));
   };
 
   const removeChore = (id: string) => {
-    setChores((prev) => prev.filter((c) => c.id !== id));
-    setDone((prev) => {
-      const next = { ...prev };
+    updateState((prev) => {
+      const next = { ...prev.done };
       delete next[id];
-      return next;
+      return { chores: prev.chores.filter((c) => c.id !== id), done: next };
     });
   };
 
   const changeCount = (id: string, member: Member, delta: 1 | -1) =>
-    setDone((prev) => {
-      const current = prev[id]?.[member] ?? 0;
+    updateState((prev) => {
+      const current = prev.done[id]?.[member] ?? 0;
       const next = Math.max(0, current + delta);
-      return { ...prev, [id]: { ...prev[id], [member]: next } };
+      return {
+        ...prev,
+        done: { ...prev.done, [id]: { ...prev.done[id], [member]: next } },
+      };
     });
 
   const addCheck = (id: string, member: Member) => changeCount(id, member, 1);
   const removeCheck = (id: string, member: Member) =>
     changeCount(id, member, -1);
 
-  const resetWeek = () => setDone({});
+  // Reset: borra solo los conteos, mantiene la lista de tareas
+  const resetWeek = () =>
+    updateState((prev) => ({ ...prev, done: {} }));
 
   const totals = Object.fromEntries(
     MEMBERS.map((m) => [
@@ -55,5 +62,7 @@ export function useChores() {
     addCheck,
     removeCheck,
     resetWeek,
+    syncStatus: status,
+    syncError: error,
   };
 }
