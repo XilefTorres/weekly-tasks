@@ -24,6 +24,9 @@ importers:
       '@eslint/js':
         specifier: ^10.0.1
         version: 10.0.1(eslint@10.11.0(jiti@2.7.0))
+      '@netlify/functions':
+        specifier: ^6.0.2
+        version: 6.0.2
       '@types/node':
         specifier: ^24.13.3
         version: 24.13.6
@@ -216,6 +219,14 @@ packages:
 
   '@keyv/serialize@1.1.1':
     resolution: {integrity: sha512-dXn3FZhPv0US+7dtJsIi2R+c7qWYiReoEh5zUntWCf4oSpMNib8FDhSoed6m3QyZdx5hK7iLFkYk3rNxwt8vTA==}
+
+  '@netlify/functions@6.0.2':
+    resolution: {integrity: sha512-JqbPgAOt2GAwzCEitdEWAHOn6AkZ0Rna401wdAyuDIBiDv9M03b3Cu5mGH7/eHOmIXfZIcN1pG35flHjfu6asQ==}
+    engines: {node: '>=22.12.0'}
+
+  '@netlify/types@3.2.0':
+    resolution: {integrity: sha512-PVvY1EEN9i2Er0LQoiyNG7i/BnwnttLuZqIkBnhL2Jrcj3P5N/NcGkv1i20MJ2ngNGSPQcT7tagDmF3V6BsdWg==}
+    engines: {node: '>=22.12.0'}
 
   '@oxc-project/types@0.150.0':
     resolution: {integrity: sha512-rDS5/31E9HfPl/CIzGrn0DOlvBbXFseQ5URJ9sYMfstbKLD/c6Gm9vmRzRGDdAXyOIL4zmO37lc9RIwYqVruZw==}
@@ -1320,6 +1331,12 @@ snapshots:
       keyv: 5.6.0
 
   '@keyv/serialize@1.1.1': {}
+
+  '@netlify/functions@6.0.2':
+    dependencies:
+      '@netlify/types': 3.2.0
+
+  '@netlify/types@3.2.0': {}
 
   '@oxc-project/types@0.150.0': {}
 

@@ -10,46 +10,22 @@ const EMPTY: WeeklyState = { chores: [], done: {} };
 
 const GIST_ID = import.meta.env.VITE_GH_GIST_ID as string | undefined;
 const TOKEN = import.meta.env.VITE_GH_TOKEN as string | undefined;
-const FILE_NAME = "weekly-state.json";
 
 const isConfigured = !!(GIST_ID && TOKEN);
 
-const GH_HEADERS = {
-  Authorization: `Bearer ${TOKEN}`,
-  Accept: "application/vnd.github+json",
-  "Content-Type": "application/json",
-};
-
 async function fetchState(): Promise<WeeklyState> {
-  const res = await fetch(`https://api.github.com/gists/${GIST_ID}`, {
-    headers: GH_HEADERS,
-  });
-  if (!res.ok) throw new Error(`GitHub Gist fetch failed: ${res.status}`);
-  const json = await res.json();
-  const file = json.files[FILE_NAME];
-  if (!file || !file.content) return EMPTY;
-  return JSON.parse(file.content);
+  const res = await fetch("/.netlify/functions/gist-sync");
+  if (!res.ok) throw new Error("Error fetching state");
+  return res.json();
 }
 
 async function saveState(state: WeeklyState): Promise<void> {
-  const res = await fetch(`https://api.github.com/gists/${GIST_ID}`, {
-    method: "PATCH",
-    headers: GH_HEADERS,
-    body: JSON.stringify({
-      files: {
-        [FILE_NAME]: {
-          content: JSON.stringify(state, null, 2),
-        },
-      },
-    }),
+  const res = await fetch("/.netlify/functions/gist-sync", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(state),
   });
-
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({}));
-    throw new Error(
-      `GitHub Gist save failed: ${res.status} ${JSON.stringify(err)}`,
-    );
-  }
+  if (!res.ok) throw new Error("Error saving state");
 }
 
 export type SyncStatus = "idle" | "loading" | "saving" | "error";
