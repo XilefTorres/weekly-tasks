@@ -8,11 +8,6 @@ export interface WeeklyState {
 
 const EMPTY: WeeklyState = { chores: [], done: {} };
 
-const GIST_ID = import.meta.env.VITE_GH_GIST_ID as string | undefined;
-const TOKEN = import.meta.env.VITE_GH_TOKEN as string | undefined;
-
-const isConfigured = !!(GIST_ID && TOKEN);
-
 async function fetchState(): Promise<WeeklyState> {
   const res = await fetch("/.netlify/functions/gist-sync");
   if (!res.ok) throw new Error("Error fetching state");
@@ -44,11 +39,6 @@ export function useGitHubStorage() {
 
   // ── Carga inicial ─────────────────────────────────────────────
   useEffect(() => {
-    if (!isConfigured) {
-      console.warn("[useGitHubStorage] Variables VITE_GH_* no configuradas.");
-      initializedRef.current = true;
-      return;
-    }
     setStatus("loading");
     fetchState()
       .then((remote) => {
@@ -67,7 +57,7 @@ export function useGitHubStorage() {
 
   // ── Guardado con debounce ─────────────────────────────────────
   useEffect(() => {
-    if (!initializedRef.current || !isConfigured) return;
+    if (!initializedRef.current) return;
 
     if (debounceRef.current) clearTimeout(debounceRef.current);
     pendingRef.current = state;
